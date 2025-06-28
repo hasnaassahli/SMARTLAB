@@ -1,19 +1,23 @@
-import { BrowserRouter as Router } from "react-router-dom";
+// src/App.tsx
+import React from "react";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer"; 
+import Sidebar from "./components/Sidebar";
+import Footer from "./components/Footer";
 import AppRoutes from "./routes/AppRoutes";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <Router>
+    <div className="d-flex flex-column min-vh-100">
       <Navbar />
-      <main className="container py-4">
-     <AppRoutes />
-     
-      </main>
+      <div className="d-flex flex-grow-1">
+        <Sidebar />
+        <main style={{ marginLeft: 220, padding: "20px", width: "100%" }}>
+          <AppRoutes />
+        </main>
+      </div>
       <Footer />
-    </Router>
+    </div>
   );
-}
+};
 
 export default App;

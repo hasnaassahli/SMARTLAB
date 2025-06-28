@@ -1,64 +1,88 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { getResults, addResult, updateResult, deleteResult } from "../services/resultService";
 
-interface Result {
-  _id: string;
-  patientName: string;
-  testType: string;
-  result: string;
-  date: string;
-  urgent: boolean;
-}
-
-export default function Results() {
-  const [results, setResults] = useState<Result[]>([]);
-  const [loading, setLoading] = useState(true);
+const Results: React.FC = () => {
+  const [results, setResults] = useState<any[]>([]);
+  const [form, setForm] = useState({ sampleCode: "", value: "" });
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
-    axios
-      .get("/api/results", {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => setResults(res.data))
-      .catch((err) => console.error("Erreur chargement des résultats", err))
-      .finally(() => setLoading(false));
+    fetchResults();
   }, []);
 
-  if (loading) return <div className="text-center mt-5">Chargement des résultats...</div>;
+  const fetchResults = async () => {
+    const data = await getResults();
+    setResults(data);
+  };
+
+  const handleSubmit = async () => {
+    if (editId) {
+      await updateResult(editId, form);
+      setEditId(null);
+    } else {
+      await addResult(form);
+    }
+    setForm({ sampleCode: "", value: "" });
+    fetchResults();
+  };
+
+  const handleEdit = (result: any) => {
+    setForm({ sampleCode: result.sampleCode, value: result.value });
+    setEditId(result._id);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteResult(id);
+    fetchResults();
+  };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4 text-primary">📊 Liste des Résultats</h2>
-      {results.length === 0 ? (
-        <div className="alert alert-warning">Aucun résultat trouvé.</div>
-      ) : (
-        <div className="table-responsive">
-          <table className="table table-bordered table-hover">
-            <thead className="table-light">
-              <tr>
-                <th>Nom du patient</th>
-                <th>Type d'analyse</th>
-                <th>Résultat</th>
-                <th>Date</th>
-                <th>Urgent</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((r) => (
-                <tr key={r._id}>
-                  <td>{r.patientName}</td>
-                  <td>{r.testType}</td>
-                  <td>{r.result}</td>
-                  <td>{new Date(r.date).toLocaleDateString()}</td>
-                  <td>{r.urgent ? <span className="text-danger fw-bold">Oui</span> : "Non"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+    <div className="container" style={{ marginLeft: 240 }}>
+      <h2 className="mt-4">Gestion des Résultats</h2>
+
+      <input
+        className="form-control mb-2"
+        placeholder="Code échantillon"
+        value={form.sampleCode}
+        onChange={(e) => setForm({ ...form, sampleCode: e.target.value })}
+      />
+      <input
+        className="form-control mb-2"
+        placeholder="Valeur"
+        value={form.value}
+        onChange={(e) => setForm({ ...form, value: e.target.value })}
+      />
+      <button className="btn btn-primary mb-3" onClick={handleSubmit}>
+        {editId ? "Modifier" : "Ajouter"}
+      </button>
+
+      <table className="table table-bordered">
+        <thead>
+          <tr>
+            <th>Code échantillon</th>
+            <th>Valeur</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {results.map((r) => (
+            <tr key={r._id}>
+              <td>{r.sampleCode}</td>
+              <td>{r.value}</td>
+              <td>
+                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(r)}>
+                  Modifier
+                </button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r._id)}>
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
+
+export default Results;

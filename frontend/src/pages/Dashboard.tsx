@@ -1,20 +1,13 @@
-import Card from "../components/Card";
+import React from "react";
 
-export default function Dashboard() {
+const Dashboard: React.FC = () => {
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Tableau de Bord</h2>
-      <div className="row">
-        <div className="col-md-4">
-          <Card title="Patients enregistrés" value={120} color="bg-success" />
-        </div>
-        <div className="col-md-4">
-          <Card title="Échantillons en attente" value={35} color="bg-warning" />
-        </div>
-        <div className="col-md-4">
-          <Card title="Résultats urgents" value={5} color="bg-danger" />
-        </div>
-      </div>
+    <div className="container mt-4" style={{ marginLeft: 240 }}>
+      <h1>Tableau de bord</h1>
+      <p>Résumé des statistiques et informations clés.</p>
+      {/* Tu peux ajouter ici des cartes ou graphiques Bootstrap */}
     </div>
   );
-}
+};
+
+export default Dashboard;

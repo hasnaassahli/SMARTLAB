@@ -1,105 +1,67 @@
-import { useEffect, useState } from "react"
-import api from "../services/api"
+import React, { useEffect, useState } from "react";
+import { getPatients, addPatient, updatePatient, deletePatient } from "../services/patientService";
 
-interface Patient {
-  _id: string
-  name: string
-  cin: string
-}
-
-export default function Patients() {
-  const [patients, setPatients] = useState<Patient[]>([])
-  const [name, setName] = useState("")
-  const [cin, setCin] = useState("")
-  const [editingId, setEditingId] = useState<string | null>(null)
-
-  const fetchPatients = () => {
-    api.get("/patients").then((res) => setPatients(res.data))
-  }
+const Patients: React.FC = () => {
+  const [patients, setPatients] = useState<any[]>([]);
+  const [form, setForm] = useState({ name: "", age: "" });
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPatients()
-  }, [])
+    fetchPatients();
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (editingId) {
-      await api.put(`/patients/${editingId}`, { name, cin })
-      setEditingId(null)
+  const fetchPatients = async () => {
+    const data = await getPatients();
+    setPatients(data);
+  };
+
+  const handleSubmit = async () => {
+    if (editId) {
+      await updatePatient(editId, form);
+      setEditId(null);
     } else {
-      await api.post("/patients", { name, cin })
+      await addPatient(form);
     }
-    setName("")
-    setCin("")
-    fetchPatients()
-  }
+    setForm({ name: "", age: "" });
+    fetchPatients();
+  };
 
-  const handleEdit = (p: Patient) => {
-    setName(p.name)
-    setCin(p.cin)
-    setEditingId(p._id)
-  }
+  const handleEdit = (p: any) => {
+    setForm({ name: p.name, age: p.age });
+    setEditId(p._id);
+  };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Supprimer ce patient ?")) {
-      await api.delete(`/patients/${id}`)
-      fetchPatients()
-    }
-  }
+    await deletePatient(id);
+    fetchPatients();
+  };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold">Gestion des Patients</h2>
+    <div className="container" style={{ marginLeft: 240 }}>
+      <h2 className="mt-4">Gestion des Patients</h2>
+      <input className="form-control mb-2" placeholder="Nom" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+      <input className="form-control mb-2" placeholder="Âge" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+      <button className="btn btn-primary mb-3" onClick={handleSubmit}>{editId ? "Modifier" : "Ajouter"}</button>
 
-      <form onSubmit={handleSubmit} className="space-x-2">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nom"
-          className="border px-2 py-1 rounded"
-        />
-        <input
-          value={cin}
-          onChange={(e) => setCin(e.target.value)}
-          placeholder="CIN"
-          className="border px-2 py-1 rounded"
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-1 rounded">
-          {editingId ? "Modifier" : "Ajouter"}
-        </button>
-      </form>
-
-      <table className="w-full border">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="border px-4 py-2">Nom</th>
-            <th className="border px-4 py-2">CIN</th>
-            <th className="border px-4 py-2">Actions</th>
-          </tr>
+      <table className="table table-bordered">
+        <thead>
+          <tr><th>Nom</th><th>Âge</th><th>Actions</th></tr>
         </thead>
         <tbody>
           {patients.map((p) => (
             <tr key={p._id}>
-              <td className="border px-4 py-2">{p.name}</td>
-              <td className="border px-4 py-2">{p.cin}</td>
-              <td className="border px-4 py-2 space-x-2">
-                <button
-                  onClick={() => handleEdit(p)}
-                  className="bg-yellow-400 text-white px-2 py-1 rounded"
-                >
-                  Modifier
-                </button>
-                <button
-                  onClick={() => handleDelete(p._id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded"
-                >
-                  Supprimer
-                </button>
+              <td>{p.name}</td>
+              <td>{p.age}</td>
+              <td>
+                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(p)}>Modifier</button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p._id)}>Supprimer</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
-}
+  );
+};
+
+export default Patients;

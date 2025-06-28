@@ -1,8 +1,14 @@
+// src/components/Footer.tsx
+import React from "react";
 
-export default function Footer() {
+const Footer: React.FC = () => {
   return (
-    <footer className="text-center  bg-dark py-4 text-muted">
-      © 2025 SmartLAB. Tous droits réservés.
+    <footer className="bg-primary text-white text-center py-3 mt-auto">
+      <div className="container">
+        <small>&copy; {new Date().getFullYear()} SmartLAB. Tous droits réservés.</small>
+      </div>
     </footer>
   );
-}
+};
+
+export default Footer;
