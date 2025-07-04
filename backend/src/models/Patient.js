@@ -1,11 +1,11 @@
 const mongoose = require("mongoose");
 
 const patientSchema = new mongoose.Schema({
-  name: String,
-  email: String,
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   phone: String,
-  gender: String,
-  birthDate: Date
+  birthDate: Date,
+  // ajoute d'autres champs utiles ici
 });
 
 module.exports = mongoose.model("Patient", patientSchema);

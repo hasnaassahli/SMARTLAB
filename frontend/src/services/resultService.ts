@@ -1,23 +1,9 @@
-import axios from "axios";
+import api from "./api";
 
-const API_URL = "http://localhost:5000/api/results";
-
-export const getResults = async () => {
-  const res = await axios.get(API_URL);
-  return res.data;
-};
-
-export const addResult = async (result: { sampleCode: string; value: string }) => {
-  const res = await axios.post(API_URL, result);
-  return res.data;
-};
-
-export const updateResult = async (id: string, result: { sampleCode: string; value: string }) => {
-  const res = await axios.put(`${API_URL}/${id}`, result);
-  return res.data;
-};
-
-export const deleteResult = async (id: string) => {
-  const res = await axios.delete(`${API_URL}/${id}`);
-  return res.data;
-};
+export const getResults = () => api.get("/results");
+export const getResultById = (id: string) => api.get(`/results/${id}`);
+export const createResult = (data: any) => api.post("/results", data);
+export const updateResult = (id: string, data: any) => api.put(`/results/${id}`, data);
+export const deleteResult = (id: string) => api.delete(`/results/${id}`);
+export const addResult = (data: any) => api.post("/results", data)
+;

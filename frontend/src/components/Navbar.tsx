@@ -1,66 +1,33 @@
 // src/components/Navbar.tsx
-import React from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
-      <div className="container">
-        <Link className="navbar-brand" to="/">
+    <nav
+      className="navbar navbar-expand-lg navbar-dark"
+      style={{ backgroundColor: "#2a9d8f", zIndex: 1040 }}
+    >
+      <div className="container-fluid">
+        <Link to="/" className="navbar-brand d-flex align-items-center fw-bold text-white">
+          <img src="/assets/logo.png" alt="SmartLAB" height="40" className="me-2" />
           SmartLAB
         </Link>
+
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          data-bs-target="#navbarNav"
         >
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon" />
         </button>
 
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
+        <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul className="navbar-nav">
             <li className="nav-item">
-              <NavLink 
-                className="nav-link" 
-                to="/" 
-                end
-                >
-                Accueil
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/patients">
-                Patients
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/technicians">
-                Techniciens
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/cashiers">
-                Caissiers
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/results">
-                Résultats
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/dashboard">
-                Tableau de bord
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/login">
-                Connexion
-              </NavLink>
+              <Link to="/login" className="btn btn-outline-light fw-semibold px-4">
+                Se connecter
+              </Link>
             </li>
           </ul>
         </div>

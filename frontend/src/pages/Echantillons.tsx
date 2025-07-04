@@ -14,7 +14,9 @@ export default function Echantillons() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchSamples = () => {
+    setLoading(true);
+    setError("");
     axios
       .get("/api/samples", {
         headers: {
@@ -27,6 +29,10 @@ export default function Echantillons() {
         setError("❌ Impossible de charger les échantillons.");
       })
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchSamples();
   }, []);
 
   return (
@@ -34,9 +40,17 @@ export default function Echantillons() {
       <h2 className="mb-4 text-center">📋 Liste des Échantillons</h2>
 
       {loading && <div className="alert alert-info">Chargement...</div>}
-      {error && <div className="alert alert-danger">{error}</div>}
 
-      {!loading && samples.length === 0 && (
+      {error && (
+        <div className="alert alert-danger">
+          {error}{" "}
+          <button className="btn btn-sm btn-outline-light ms-2" onClick={fetchSamples}>
+            Réessayer
+          </button>
+        </div>
+      )}
+
+      {!loading && samples.length === 0 && !error && (
         <div className="alert alert-warning">Aucun échantillon trouvé.</div>
       )}
 

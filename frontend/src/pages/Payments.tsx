@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getPayments, addPayment, updatePayment, deletePayment } from "../services/paymentService";
+import { getPayments, addPayment, updatePayment, deletePayment } from "../services/paymentService"; // Adjust the import path as needed 
 
 const Payments: React.FC = () => {
   const [payments, setPayments] = useState<any[]>([]);

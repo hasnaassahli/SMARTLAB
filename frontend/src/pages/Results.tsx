@@ -1,34 +1,60 @@
 import React, { useEffect, useState } from "react";
-import { getResults, addResult, updateResult, deleteResult } from "../services/resultService";
+import { getResults, addResult, deleteResult } from "../services/resultService";
+
+interface Result {
+  _id?: string;
+  patientName: string;
+  testType: string;
+  date: string;
+  status: string;
+  value: string;
+  urgent: boolean;
+}
 
 const Results: React.FC = () => {
-  const [results, setResults] = useState<any[]>([]);
-  const [form, setForm] = useState({ sampleCode: "", value: "" });
-  const [editId, setEditId] = useState<string | null>(null);
+  const [results, setResults] = useState<Result[]>([]);
+  const [form, setForm] = useState<Result>({
+    patientName: "",
+    testType: "",
+    date: "",
+    status: "",
+    value: "",
+    urgent: false,
+  });
 
   useEffect(() => {
     fetchResults();
   }, []);
 
   const fetchResults = async () => {
-    const data = await getResults();
-    setResults(data);
-  };
+  const response = await getResults(); // getResults utilise axios.get(...)
+  setResults(response.data); // Utilise uniquement les données (tableau Result[])
+};
+  
 
-  const handleSubmit = async () => {
-    if (editId) {
-      await updateResult(editId, form);
-      setEditId(null);
-    } else {
-      await addResult(form);
-    }
-    setForm({ sampleCode: "", value: "" });
+ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value, type } = e.target;
+  const isChecked = type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
+
+  setForm({
+    ...form,
+    [name]: type === "checkbox" ? isChecked : value,
+  });
+};
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await addResult(form);
+    setForm({
+      patientName: "",
+      testType: "",
+      date: "",
+      status: "",
+      value: "",
+      urgent: false,
+    });
     fetchResults();
-  };
-
-  const handleEdit = (result: any) => {
-    setForm({ sampleCode: result.sampleCode, value: result.value });
-    setEditId(result._id);
   };
 
   const handleDelete = async (id: string) => {
@@ -37,43 +63,104 @@ const Results: React.FC = () => {
   };
 
   return (
-    <div className="container" style={{ marginLeft: 240 }}>
-      <h2 className="mt-4">Gestion des Résultats</h2>
+    <div className="container mt-5">
+      <h2 className="mb-4 text-primary">Résultats d'analyses</h2>
 
-      <input
-        className="form-control mb-2"
-        placeholder="Code échantillon"
-        value={form.sampleCode}
-        onChange={(e) => setForm({ ...form, sampleCode: e.target.value })}
-      />
-      <input
-        className="form-control mb-2"
-        placeholder="Valeur"
-        value={form.value}
-        onChange={(e) => setForm({ ...form, value: e.target.value })}
-      />
-      <button className="btn btn-primary mb-3" onClick={handleSubmit}>
-        {editId ? "Modifier" : "Ajouter"}
-      </button>
+      <form onSubmit={handleSubmit} className="row g-3 bg-light p-4 rounded shadow-sm mb-4">
+        <div className="col-md-6">
+          <input
+            type="text"
+            className="form-control"
+            name="patientName"
+            placeholder="Nom du patient"
+            value={form.patientName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-6">
+          <input
+            type="text"
+            className="form-control"
+            name="testType"
+            placeholder="Type d'analyse"
+            value={form.testType}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-4">
+          <input
+            type="date"
+            className="form-control"
+            name="date"
+            value={form.date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-md-4">
+          <select
+            className="form-select"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Statut</option>
+            <option value="en cours">En cours</option>
+            <option value="terminé">Terminé</option>
+          </select>
+        </div>
+        <div className="col-md-4">
+          <input
+            type="text"
+            className="form-control"
+            name="value"
+            placeholder="Valeur"
+            value={form.value}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="col-12 form-check">
+          <input
+            type="checkbox"
+            className="form-check-input"
+            name="urgent"
+            checked={form.urgent}
+            onChange={handleChange}
+          />
+          <label className="form-check-label ms-2">Urgent</label>
+        </div>
+        <div className="col-12 text-end">
+          <button type="submit" className="btn btn-success">Ajouter Résultat</button>
+        </div>
+      </form>
 
-      <table className="table table-bordered">
-        <thead>
+      <table className="table table-bordered table-hover shadow-sm">
+        <thead className="table-primary">
           <tr>
-            <th>Code échantillon</th>
+            <th>Patient</th>
+            <th>Analyse</th>
+            <th>Date</th>
+            <th>Statut</th>
             <th>Valeur</th>
+            <th>Urgent</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {results.map((r) => (
             <tr key={r._id}>
-              <td>{r.sampleCode}</td>
+              <td>{r.patientName}</td>
+              <td>{r.testType}</td>
+              <td>{new Date(r.date).toLocaleDateString()}</td>
+              <td>{r.status}</td>
               <td>{r.value}</td>
+              <td>{r.urgent ? "Oui" : "Non"}</td>
               <td>
-                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(r)}>
-                  Modifier
-                </button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r._id)}>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(r._id!)}>
                   Supprimer
                 </button>
               </td>

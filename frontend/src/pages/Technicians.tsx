@@ -1,9 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { getTechnicians, addTechnician, updateTechnician, deleteTechnician } from "../services/technicianService";
+import {
+  getTechnicians,
+  createTechnician,
+  updateTechnician,
+  deleteTechnician,
+} from "../services/technicianService";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Table, Button, Form } from "react-bootstrap";
+
+interface Technician {
+  _id?: string;
+  name: string;
+  email: string;
+  specialty: string;
+}
 
 const Technicians: React.FC = () => {
-  const [technicians, setTechnicians] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: "", specialty: "" });
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
+  const [form, setForm] = useState<Technician>({ name: "", email: "", specialty: "" });
   const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -11,55 +25,127 @@ const Technicians: React.FC = () => {
   }, []);
 
   const fetchTechnicians = async () => {
-    const data = await getTechnicians();
-    setTechnicians(data);
-  };
-
-  const handleSubmit = async () => {
-    if (editId) {
-      await updateTechnician(editId, form);
-      setEditId(null);
-    } else {
-      await addTechnician(form);
+    try {
+      const response = await getTechnicians();
+      setTechnicians(response.data);
+    } catch (error) {
+      console.error("Erreur lors du chargement des techniciens :", error);
     }
-    setForm({ name: "", specialty: "" });
-    fetchTechnicians();
   };
 
-  const handleEdit = (t: any) => {
-    setForm({ name: t.name, specialty: t.specialty });
-    setEditId(t._id);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editId) {
+        await updateTechnician(editId, form);
+        setEditId(null);
+      } else {
+        await createTechnician(form);
+      }
+      setForm({ name: "", email: "", specialty: "" });
+      fetchTechnicians();
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement :", error);
+    }
+  };
+
+  const handleEdit = (tech: Technician) => {
+    setForm({ name: tech.name, email: tech.email, specialty: tech.specialty });
+    setEditId(tech._id || null);
   };
 
   const handleDelete = async (id: string) => {
-    await deleteTechnician(id);
-    fetchTechnicians();
+    try {
+      await deleteTechnician(id);
+      fetchTechnicians();
+    } catch (error) {
+      console.error("Erreur lors de la suppression :", error);
+    }
   };
 
   return (
-    <div className="container" style={{ marginLeft: 240 }}>
-      <h2 className="mt-4">Gestion des Techniciens</h2>
-      <input className="form-control mb-2" placeholder="Nom" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-      <input className="form-control mb-2" placeholder="Spécialité" value={form.specialty} onChange={(e) => setForm({ ...form, specialty: e.target.value })} />
-      <button className="btn btn-primary mb-3" onClick={handleSubmit}>{editId ? "Modifier" : "Ajouter"}</button>
+    <div className="container mt-4">
+      <h2 className="mb-4">Gestion des techniciens</h2>
 
-      <table className="table table-bordered">
+      <Form onSubmit={handleSubmit} className="mb-4">
+        <Form.Group className="mb-2">
+          <Form.Label>Nom</Form.Label>
+          <Form.Control
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-2">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Spécialité</Form.Label>
+          <Form.Control
+            type="text"
+            name="specialty"
+            value={form.specialty}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+
+        <Button type="submit" variant="primary">
+          {editId ? "Modifier" : "Ajouter"}
+        </Button>
+      </Form>
+
+      <Table striped bordered hover>
         <thead>
-          <tr><th>Nom</th><th>Spécialité</th><th>Actions</th></tr>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Spécialité</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
-          {technicians.map((t) => (
-            <tr key={t._id}>
-              <td>{t.name}</td>
-              <td>{t.specialty}</td>
+          {technicians.map((tech) => (
+            <tr key={tech._id}>
+              <td>{tech.name}</td>
+              <td>{tech.email}</td>
+              <td>{tech.specialty}</td>
               <td>
-                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(t)}>Modifier</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(t._id)}>Supprimer</button>
+                <Button
+                  variant="warning"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleEdit(tech)}
+                >
+                  Modifier
+                </Button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => tech._id && handleDelete(tech._id)}
+                >
+                  Supprimer
+                </Button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 };

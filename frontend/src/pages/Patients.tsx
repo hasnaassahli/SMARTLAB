@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getPatients, addPatient, updatePatient, deletePatient } from "../services/patientService";
+import { getPatients, deletePatient } from "../services/patientService";
+import type { Patient } from "../services/patientService";
 
 const Patients: React.FC = () => {
-  const [patients, setPatients] = useState<any[]>([]);
-  const [form, setForm] = useState({ name: "", age: "" });
-  const [editId, setEditId] = useState<string | null>(null);
+  const [patients, setPatients] = useState<Patient[]>([]);
 
   useEffect(() => {
     fetchPatients();
@@ -12,49 +11,39 @@ const Patients: React.FC = () => {
 
   const fetchPatients = async () => {
     const data = await getPatients();
-    setPatients(data);
-  };
-
-  const handleSubmit = async () => {
-    if (editId) {
-      await updatePatient(editId, form);
-      setEditId(null);
-    } else {
-      await addPatient(form);
-    }
-    setForm({ name: "", age: "" });
-    fetchPatients();
-  };
-
-  const handleEdit = (p: any) => {
-    setForm({ name: p.name, age: p.age });
-    setEditId(p._id);
+    setPatients(data); // data est déjà un tableau Patient[]
   };
 
   const handleDelete = async (id: string) => {
-    await deletePatient(id);
-    fetchPatients();
+    if (window.confirm("Supprimer ce patient ?")) {
+      await deletePatient(id);
+      fetchPatients();
+    }
   };
 
   return (
-    <div className="container" style={{ marginLeft: 240 }}>
-      <h2 className="mt-4">Gestion des Patients</h2>
-      <input className="form-control mb-2" placeholder="Nom" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-      <input className="form-control mb-2" placeholder="Âge" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
-      <button className="btn btn-primary mb-3" onClick={handleSubmit}>{editId ? "Modifier" : "Ajouter"}</button>
-
-      <table className="table table-bordered">
-        <thead>
-          <tr><th>Nom</th><th>Âge</th><th>Actions</th></tr>
+    <div className="container mt-4">
+      <h2 className="mb-4 text-primary">Liste des patients</h2>
+      <table className="table table-bordered table-hover">
+        <thead className="table-light">
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Actions</th>
+          </tr>
         </thead>
         <tbody>
-          {patients.map((p) => (
-            <tr key={p._id}>
-              <td>{p.name}</td>
-              <td>{p.age}</td>
+          {patients.map((patient) => (
+            <tr key={patient._id}>
+              <td>{patient.name}</td>
+              <td>{patient.email}</td>
               <td>
-                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(p)}>Modifier</button>
-                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(p._id)}>Supprimer</button>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDelete(patient._id)}
+                >
+                  Supprimer
+                </button>
               </td>
             </tr>
           ))}
