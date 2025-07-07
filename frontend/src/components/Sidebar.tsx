@@ -1,5 +1,6 @@
-// src/components/Sidebar.tsx
+import React from "react";
 import { NavLink } from "react-router-dom";
+import logo from "/public/assets/logo.png"; // Assure-toi que le fichier est bien dans /public/assets/
 
 const Sidebar: React.FC = () => {
   const links = [
@@ -10,21 +11,33 @@ const Sidebar: React.FC = () => {
     { path: "/samples", label: "Échantillons" },
     { path: "/results", label: "Résultats" },
     { path: "/technicians", label: "Techniciens" },
-    { path: "/cashiers", label: "Caissiers" },
+    { path: "/cashier", label: "Caissiers" },
   ];
 
   return (
     <div
-      className="bg-light border-end p-3"
-      style={{ width: "220px", minHeight: "100vh", position: "fixed", top: "56px", left: 0 }}
+      className="d-flex flex-column bg-white border-end shadow-sm p-3"
+      style={{ width: "250px", height: "150vh", position: "fixed", top: 0, left: 0, overflowY: "auto" }}
     >
+      <div className="text-center mb-4">
+        <img
+          src={logo}
+          alt="SmartLAB Logo"
+          className="img-fluid mb-2"
+          style={{ maxWidth: "100px" }}
+        />
+        <h5 className="fw-bold text-primary">SmartLAB</h5>
+      </div>
+
       <nav className="nav flex-column">
         {links.map((link) => (
           <NavLink
             key={link.path}
             to={link.path}
             className={({ isActive }) =>
-              `nav-link mb-2 ${isActive ? "fw-bold text-primary" : "text-dark"}`
+              `nav-link mb-2 rounded px-3 py-2 ${
+                isActive ? "bg-secondary text-white fw-bold" : "text-dark"
+              }`
             }
           >
             {link.label}

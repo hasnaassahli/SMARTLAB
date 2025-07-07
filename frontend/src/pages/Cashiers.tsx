@@ -1,102 +1,85 @@
-import { useEffect, useState } from "react";
-import api from "../services/api";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-interface Patient {
-  _id: string;
-  name: string;
-  cin: string;
-}
-
-interface Analysis {
-  _id: string;
-  name: string;
-  price: number;
-}
-
-export default function Cashier() {
-  const [patients, setPatients] = useState<Patient[]>([]);
-  const [analyses, setAnalyses] = useState<Analysis[]>([]);
-  const [selectedPatientId, setSelectedPatientId] = useState("");
-  const [selectedAnalyses, setSelectedAnalyses] = useState<string[]>([]);
+const Cashiers: React.FC = () => {
+  const [appointments, setAppointments] = useState([]);
+  const [patients, setPatients] = useState([]);
 
   useEffect(() => {
-    api.get("/patients").then((res) => setPatients(res.data));
-    api.get("/analyses").then((res) => setAnalyses(res.data));
+    const fetchData = async () => {
+      const [resAppointments, resPatients] = await Promise.all([
+        axios.get("http://localhost:5000/api/appointments"),
+        axios.get("http://localhost:5000/api/patients"),
+      ]);
+      setAppointments(resAppointments.data);
+      setPatients(resPatients.data);
+    };
+    fetchData();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPatientId || selectedAnalyses.length === 0) {
-      alert("Veuillez sélectionner un patient et au moins une analyse.");
-      return;
+  const handleValidate = async (id: string) => {
+    try {
+      await axios.put(`http://localhost:5000/api/appointments/${id}/status`, {
+        status: "Confirmé",
+      });
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a._id === id ? { ...a, status: "Confirmé" } : a
+        )
+      );
+    } catch (err) {
+      alert("Erreur lors de la validation.");
     }
-
-    await api.post("/cashiers", {
-      patientId: selectedPatientId,
-      analyses: selectedAnalyses,
-    });
-
-    setSelectedPatientId("");
-    setSelectedAnalyses([]);
-    alert("Analyse enregistrée avec succès !");
-  };
-
-  const toggleAnalysis = (id: string) => {
-    setSelectedAnalyses((prev) =>
-      prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
-    );
   };
 
   return (
     <div className="container mt-5">
-      <h2 className="mb-4 text-primary">💵 Enregistrement par le Caissier</h2>
+      <h2>📅 Liste des Rendez-vous</h2>
+      <table className="table table-bordered mb-5">
+        <thead>
+          <tr>
+            <th>Nom</th><th>Téléphone</th><th>Date</th><th>Heure</th><th>Statut</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {appointments.map((a, i) => (
+            <tr key={i}>
+              <td>{a.patientName}</td>
+              <td>{a.phone}</td>
+              <td>{a.date}</td>
+              <td>{a.time}</td>
+              <td>{a.status}</td>
+              <td>
+                {a.status === "En attente" && (
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => handleValidate(a._id)}
+                  >
+                    Valider
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-      <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
-        {/* Sélection du patient */}
-        <div className="mb-3">
-          <label className="form-label">Patient</label>
-          <select
-            className="form-select"
-            value={selectedPatientId}
-            onChange={(e) => setSelectedPatientId(e.target.value)}
-          >
-            <option value="">-- Sélectionner un patient --</option>
-            {patients.map((p) => (
-              <option key={p._id} value={p._id}>
-                {p.name} ({p.cin})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Sélection des analyses */}
-        <div className="mb-3">
-          <label className="form-label">Analyses demandées</label>
-          <div className="row">
-            {analyses.map((a) => (
-              <div className="col-md-4" key={a._id}>
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    id={a._id}
-                    checked={selectedAnalyses.includes(a._id)}
-                    onChange={() => toggleAnalysis(a._id)}
-                  />
-                  <label className="form-check-label" htmlFor={a._id}>
-                    {a.name} ({a.price} MAD)
-                  </label>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bouton soumettre */}
-        <button type="submit" className="btn btn-success">
-          ✅ Enregistrer la demande
-        </button>
-      </form>
+      <h2>🧑‍⚕️ Patients Enregistrés</h2>
+      <table className="table table-bordered">
+        <thead>
+          <tr><th>Nom</th><th>Email</th></tr>
+        </thead>
+        <tbody>
+          {patients.map((p, i) => (
+            <tr key={i}>
+              <td>{p.name}</td>
+              <td>{p.email}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
-}
+};
+
+export default Cashiers;

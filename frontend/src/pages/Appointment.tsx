@@ -1,91 +1,112 @@
 import React, { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-
-// Simule un service d'API (à remplacer par ton vrai service)
-async function addAppointment(data: {
-  patientName: string;
-  date: string;
-  testType: string;
-}): Promise<void> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log("Rendez-vous ajouté :", data);
-      resolve();
-    }, 1000);
-  });
-}
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Appointment: React.FC = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     patientName: "",
+    phone: "",
+    email: "",
+    typeAnalyse: "",
     date: "",
-    testType: "",
+    time: "",
   });
 
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-
     try {
-      await addAppointment(form);
-      setMessage("Rendez-vous pris avec succès !");
-      setForm({ patientName: "", date: "", testType: "" });
-    } catch {
-      setMessage("Erreur lors de la prise de rendez-vous.");
+      await axios.post("http://localhost:5000/api/appointments", {
+        ...form,
+        datetime: `${form.date}T${form.time}`, // Combine date and time if backend expects datetime
+      });
+      alert("Rendez-vous enregistré !");
+      navigate("/login"); // ou navigate("/dashboard") si tu préfères
+    } catch (err) {
+      alert("Erreur d'enregistrement");
     }
-    setLoading(false);
   };
 
   return (
-    <div className="container mt-4">
-      <h2>Prise de Rendez-vous</h2>
-      {message && <div className="alert alert-info">{message}</div>}
-
-      <form onSubmit={handleSubmit} className="mb-4">
-        <input
-          type="text"
-          name="patientName"
-          placeholder="Nom du patient"
-          className="form-control mb-2"
-          value={form.patientName}
-          onChange={handleChange}
-          required
-          autoComplete="off"
-        />
-
-        <input
-          type="date"
-          name="date"
-          className="form-control mb-2"
-          value={form.date}
-          onChange={handleChange}
-          required
-        />
-
-        <select
-          name="testType"
-          className="form-select mb-2"
-          value={form.testType}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Sélectionnez un type d'analyse</option>
-          <option value="Hématologie">Hématologie</option>
-          <option value="Biochimie">Biochimie</option>
-          <option value="Microbiologie">Microbiologie</option>
-        </select>
-
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "En cours..." : "Prendre Rendez-vous"}
+    <div className="container" style={{ marginLeft: 240, maxWidth: 600 }}>
+      <h2 className="mt-4 mb-3">Prendre un rendez-vous</h2>
+      <form onSubmit={handleSubmit} className="p-4 border bg-light rounded shadow-sm">
+        <div className="mb-3">
+          <label>Nom du patient</label>
+          <input
+            type="text"
+            name="patientName"
+            className="form-control"
+            value={form.patientName}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            className="form-control"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Téléphone</label>
+          <input
+            type="tel"
+            name="phone"
+            className="form-control"
+            value={form.phone}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Type d’analyse</label>
+          <select
+            name="typeAnalyse"
+            className="form-select"
+            value={form.typeAnalyse}
+            onChange={handleChange}
+            required
+          >
+            <option value="">-- Sélectionner --</option>
+            <option value="Sang">Analyse de sang</option>
+            <option value="Urine">Analyse d'urine</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+        <div className="mb-3">
+          <label>Date</label>
+          <input
+            type="date"
+            name="date"
+            className="form-control"
+            value={form.date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="mb-3">
+          <label>Heure</label>
+          <input
+            type="time"
+            name="time"
+            className="form-control"
+            value={form.time}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" className="btn btn-primary w-100">
+          Valider le rendez-vous
         </button>
       </form>
     </div>
@@ -93,3 +114,4 @@ const Appointment: React.FC = () => {
 };
 
 export default Appointment;
+

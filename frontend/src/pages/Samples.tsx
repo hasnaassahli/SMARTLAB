@@ -1,90 +1,86 @@
-// src/pages/Samples.tsx
 import React, { useEffect, useState } from "react";
-import { getSamples, addSample } from "../services/sampleService";
-
-interface Sample {
-  _id?: string;
-  patientName: string;
-  sampleType: string;
-  dateCollected: string;
-}
+import { getSamples, addSample, updateSample, deleteSample } from "../services/sampleService"; // Adjust the import path as needed
 
 const Samples: React.FC = () => {
-  const [samples, setSamples] = useState<Sample[]>([]);
-  const [newSample, setNewSample] = useState<Sample>({
-    patientName: "",
-    sampleType: "",
-    dateCollected: "",
-  });
+  const [samples, setSamples] = useState<any[]>([]);
+  const [form, setForm] = useState({ code: "", description: "" });
+  const [editId, setEditId] = useState<string | null>(null);
 
   useEffect(() => {
-    getSamples().then(setSamples);
+    fetchSamples();
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setNewSample({ ...newSample, [e.target.name]: e.target.value });
+  const fetchSamples = async () => {
+    const data = await getSamples();
+    setSamples(data);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const added = await addSample(newSample);
-    setSamples([...samples, added]);
-    setNewSample({ patientName: "", sampleType: "", dateCollected: "" });
+  const handleSubmit = async () => {
+    if (editId) {
+      await updateSample(editId, form);
+      setEditId(null);
+    } else {
+      await addSample(form);
+    }
+    setForm({ code: "", description: "" });
+    fetchSamples();
+  };
+
+  const handleEdit = (sample: any) => {
+    setForm({ code: sample.code, description: sample.description });
+    setEditId(sample._id);
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteSample(id);
+    fetchSamples();
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Gestion des échantillons</h2>
+    <div className="container" style={{ marginLeft: 240 }}>
+      <h2 className="mt-4">Gestion des Échantillons</h2>
 
-      <form className="mb-4 border rounded p-4 shadow" onSubmit={handleSubmit}>
-        <div className="mb-3">
-          <label className="form-label">Nom du patient</label>
-          <input
-            type="text"
-            className="form-control"
-            name="patientName"
-            value={newSample.patientName}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Type d'échantillon</label>
-          <select
-            className="form-select"
-            name="sampleType"
-            value={newSample.sampleType}
-            onChange={handleChange}
-            required
-          >
-            <option value="">-- Choisir --</option>
-            <option value="Sang">Sang</option>
-            <option value="Urine">Urine</option>
-            <option value="Salive">Salive</option>
-          </select>
-        </div>
-        <div className="mb-3">
-          <label className="form-label">Date de collecte</label>
-          <input
-            type="date"
-            className="form-control"
-            name="dateCollected"
-            value={newSample.dateCollected}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button className="btn btn-primary" type="submit">Ajouter</button>
-      </form>
+      <input
+        className="form-control mb-2"
+        placeholder="Code échantillon"
+        value={form.code}
+        onChange={(e) => setForm({ ...form, code: e.target.value })}
+      />
+      <input
+        className="form-control mb-2"
+        placeholder="Description"
+        value={form.description}
+        onChange={(e) => setForm({ ...form, description: e.target.value })}
+      />
+      <button className="btn btn-primary mb-3" onClick={handleSubmit}>
+        {editId ? "Modifier" : "Ajouter"}
+      </button>
 
-      <h4>Liste des échantillons</h4>
-      <ul className="list-group">
-        {samples.map((sample) => (
-          <li className="list-group-item" key={sample._id}>
-            {sample.patientName} - {sample.sampleType} - {sample.dateCollected}
-          </li>
-        ))}
-      </ul>
+      <table className="table table-bordered">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Description</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {samples.map((s) => (
+            <tr key={s._id}>
+              <td>{s.code}</td>
+              <td>{s.description}</td>
+              <td>
+                <button className="btn btn-sm btn-warning me-2" onClick={() => handleEdit(s)}>
+                  Modifier
+                </button>
+                <button className="btn btn-sm btn-danger" onClick={() => handleDelete(s._id)}>
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
