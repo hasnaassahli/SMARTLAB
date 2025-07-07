@@ -1,6 +1,7 @@
-const Technician = require("../models/Technician");
+import Technician from "../models/Technician.js";
 
-exports.getAllTechnicians = async (req, res) => {
+// ✅ Obtenir tous les techniciens
+export const getAllTechnicians = async (req, res) => {
   try {
     const technicians = await Technician.find();
     res.json(technicians);
@@ -9,7 +10,8 @@ exports.getAllTechnicians = async (req, res) => {
   }
 };
 
-exports.createTechnician = async (req, res) => {
+// ✅ Créer un technicien
+export const createTechnician = async (req, res) => {
   try {
     const technician = new Technician(req.body);
     await technician.save();
@@ -19,7 +21,8 @@ exports.createTechnician = async (req, res) => {
   }
 };
 
-exports.updateTechnician = async (req, res) => {
+// ✅ Mettre à jour un technicien
+export const updateTechnician = async (req, res) => {
   try {
     const updated = await Technician.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updated);
@@ -28,7 +31,8 @@ exports.updateTechnician = async (req, res) => {
   }
 };
 
-exports.deleteTechnician = async (req, res) => {
+// ✅ Supprimer un technicien
+export const deleteTechnician = async (req, res) => {
   try {
     await Technician.findByIdAndDelete(req.params.id);
     res.json({ message: "Technician deleted" });

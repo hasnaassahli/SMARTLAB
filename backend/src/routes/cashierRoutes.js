@@ -1,4 +1,4 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
 const {
   getAllCashiers,
@@ -14,4 +14,4 @@ router.get("/:id", getCashierById);
 router.put("/:id", updateCashier);
 router.delete("/:id", deleteCashier);
 
-module.exports = router;
+export default router;

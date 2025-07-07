@@ -1,4 +1,4 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
 const {
   getAllResults,
@@ -12,4 +12,4 @@ router.post("/", createResult);
 router.put("/:id", updateResult);
 router.delete("/:id", deleteResult);
 
-module.exports = router;
+export default router;

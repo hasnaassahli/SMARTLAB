@@ -1,10 +1,12 @@
-const mongoose = require("mongoose");
+// backend/src/models/Technician.js
+import mongoose from "mongoose";
 
 const technicianSchema = new mongoose.Schema({
   name: String,
   email: String,
   phone: String,
-  specialization: String
+  specialization: String,
 });
 
-module.exports = mongoose.model("Technician", technicianSchema);
+const Technician = mongoose.model("Technician", technicianSchema);
+export default Technician;

@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+// backend/src/models/Sample.js
+import mongoose from "mongoose";
 
 const sampleSchema = new mongoose.Schema({
   patient: { type: mongoose.Schema.Types.ObjectId, ref: "Patient" },
@@ -7,4 +8,5 @@ const sampleSchema = new mongoose.Schema({
   status: { type: String, default: "Pending" }
 });
 
-module.exports = mongoose.model("Sample", sampleSchema);
+const Sample = mongoose.model("Sample", sampleSchema);
+export default Sample;

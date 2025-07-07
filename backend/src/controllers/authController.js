@@ -1,57 +1,47 @@
-// controllers/crudController.js
-function createCrudController(Model) {
-  return {
-    getAll: async (req, res) => {
-      try {
-        const items = await Model.find();
-        res.json(items);
-      } catch (err) {
-        res.status(500).json({ message: err.message });
-      }
-    },
 
-    getById: async (req, res) => {
-      try {
-        const item = await Model.findById(req.params.id);
-        if (!item) return res.status(404).json({ message: "Non trouvé" });
-        res.json(item);
-      } catch (err) {
-        res.status(500).json({ message: err.message });
-      }
-    },
+import User from "../models/User.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-    create: async (req, res) => {
-      try {
-        const newItem = new Model(req.body);
-        const savedItem = await newItem.save();
-        res.status(201).json(savedItem);
-      } catch (err) {
-        res.status(400).json({ message: err.message });
-      }
-    },
+export const register = async (req, res) => {
+  const { name, email, password, role } = req.body;
 
-    update: async (req, res) => {
-      try {
-        const updatedItem = await Model.findByIdAndUpdate(req.params.id, req.body, {
-          new: true,
-        });
-        if (!updatedItem) return res.status(404).json({ message: "Non trouvé" });
-        res.json(updatedItem);
-      } catch (err) {
-        res.status(400).json({ message: err.message });
-      }
-    },
+  try {
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ message: 'Email already in use' });
 
-    delete: async (req, res) => {
-      try {
-        const deletedItem = await Model.findByIdAndDelete(req.params.id);
-        if (!deletedItem) return res.status(404).json({ message: "Non trouvé" });
-        res.json({ message: "Supprimé avec succès" });
-      } catch (err) {
-        res.status(500).json({ message: err.message });
-      }
-    },
-  };
-}
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-module.exports = createCrudController;
+    user = new User({ name, email, password: hashedPassword, role });
+    await user.save();
+
+    res.status(201).json({ message: 'User created' });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: 'Invalid email or password' });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid email or password' });
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET || "dev-secret",
+      { expiresIn: "1d" }
+    );
+
+    res.status(200).json({ message: 'Login successful', token, role: user.role, userId: user._id });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

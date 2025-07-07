@@ -1,11 +1,13 @@
-const mongoose = require("mongoose");
+// backend/src/models/Patient.js
+import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  name: String,
+  email: String,
   phone: String,
-  birthDate: Date,
-  // ajoute d'autres champs utiles ici
+  gender: String,
+  birthDate: Date
 });
 
-module.exports = mongoose.model("Patient", patientSchema);
+const Patient = mongoose.model("Patient", patientSchema);
+export default Patient;

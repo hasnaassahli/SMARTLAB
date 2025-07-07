@@ -1,4 +1,4 @@
-const Patient = require("../models/Patient");
+import Patient from"../models/Patient";
 
 exports.getAllPatients = async (req, res) => {
   const patients = await Patient.find();

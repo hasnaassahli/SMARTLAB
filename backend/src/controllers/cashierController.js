@@ -1,4 +1,4 @@
-const Cashier = require("../models/cashier");
+import Cashier from"../models/cashier";
 
 // Get all cashiers
 exports.getAllCashiers = async (req, res) => {

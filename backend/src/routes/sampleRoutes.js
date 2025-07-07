@@ -1,4 +1,4 @@
-const express = require("express");
+import express from 'express';
 const router = express.Router();
 const {
   getAllSamples,
@@ -12,4 +12,4 @@ router.post("/", createSample);
 router.put("/:id", updateSample);
 router.delete("/:id", deleteSample);
 
-module.exports = router;
+export default router;

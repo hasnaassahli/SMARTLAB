@@ -1,4 +1,4 @@
-const Result = require("../models/Result");
+import Result from "../models/Result";
 
 exports.getAllResults = async (req, res) => {
   try {

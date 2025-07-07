@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const cashierSchema = new mongoose.Schema({
   name: String,
@@ -8,4 +8,5 @@ const cashierSchema = new mongoose.Schema({
   password: String
 });
 
-module.exports = mongoose.model("Cashier", cashierSchema);
+const Cashier = mongoose.model("Cashier", cashierSchema);
+export default Cashier;

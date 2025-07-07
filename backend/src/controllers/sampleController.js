@@ -1,4 +1,4 @@
-const Sample = require("../models/Sample");
+import Sample from "../models/Sample";
 
 exports.getAllSamples = async (req, res) => {
   try {
