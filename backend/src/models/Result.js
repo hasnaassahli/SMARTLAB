@@ -1,11 +1,10 @@
-// backend/src/models/Result.js
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const resultSchema = new mongoose.Schema({
-  sample: { type: mongoose.Schema.Types.ObjectId, ref: "Sample" },
-  resultText: String,
-  createdAt: { type: Date, default: Date.now }
-});
+  patient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  analysis: { type: String, required: true },
+  value: { type: String, required: true },
+  technician: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+}, { timestamps: true });
 
-const Result = mongoose.model("Result", resultSchema);
-export default Result;
+export default mongoose.model('Result', resultSchema);

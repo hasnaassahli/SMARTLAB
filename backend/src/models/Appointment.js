@@ -1,12 +1,11 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const appointmentSchema = new mongoose.Schema({
-  patientName: String,
-  phone: String,
-  date: String,
-  time: String,
-  status: { type: String, default: "En attente" },
-});
+  patient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  name: { type: String, required: true },        // Nom du patient (duplication pour faciliter)
+  phone: { type: String, required: true },
+  date: { type: String, required: true, unique: true }, // Date du rendez-vous, unique pour éviter doublons
+  status: { type: String, enum: ['pending', 'validated'], default: 'pending' },
+}, { timestamps: true });
 
-const Appointment = mongoose.model("Appointment", appointmentSchema);
-export default Appointment;
+export default mongoose.model('Appointment', appointmentSchema);

@@ -1,12 +1,9 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const cashierSchema = new mongoose.Schema({
-  name: String,
-  email: String,
-  phone: String,
-  username: String,
-  password: String
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 });
 
-const Cashier = mongoose.model("Cashier", cashierSchema);
-export default Cashier;
+export default mongoose.model('Cashier', cashierSchema);

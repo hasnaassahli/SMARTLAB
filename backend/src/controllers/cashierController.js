@@ -1,7 +1,7 @@
-import Cashier from"../models/cashier";
+import Cashier from "../models/cashier.js";
 
-// Get all cashiers
-exports.getAllCashiers = async (req, res) => {
+// Obtenir tous les caissiers
+export const getAllCashiers = async (req, res) => {
   try {
     const cashiers = await Cashier.find();
     res.json(cashiers);
@@ -10,8 +10,8 @@ exports.getAllCashiers = async (req, res) => {
   }
 };
 
-// Create new cashier
-exports.createCashier = async (req, res) => {
+// Créer un nouveau caissier
+export const createCashier = async (req, res) => {
   try {
     const newCashier = new Cashier(req.body);
     await newCashier.save();
@@ -21,19 +21,19 @@ exports.createCashier = async (req, res) => {
   }
 };
 
-// Get one cashier by ID
-exports.getCashierById = async (req, res) => {
+// Obtenir un caissier par ID
+export const getCashierById = async (req, res) => {
   try {
     const cashier = await Cashier.findById(req.params.id);
-    if (!cashier) return res.status(404).json({ message: "Cashier not found" });
+    if (!cashier) return res.status(404).json({ message: "Caissier non trouvé" });
     res.json(cashier);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Update cashier
-exports.updateCashier = async (req, res) => {
+// Mettre à jour un caissier
+export const updateCashier = async (req, res) => {
   try {
     const updatedCashier = await Cashier.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(updatedCashier);
@@ -42,11 +42,11 @@ exports.updateCashier = async (req, res) => {
   }
 };
 
-// Delete cashier
-exports.deleteCashier = async (req, res) => {
+// Supprimer un caissier
+export const deleteCashier = async (req, res) => {
   try {
     await Cashier.findByIdAndDelete(req.params.id);
-    res.json({ message: "Cashier deleted" });
+    res.json({ message: "Caissier supprimé" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

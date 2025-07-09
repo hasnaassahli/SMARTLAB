@@ -1,15 +1,13 @@
-import express from 'express';
+// backend/routes/resultRoutes.js
+const express = require('express');
 const router = express.Router();
-const {
-  getAllResults,
-  createResult,
-  updateResult,
-  deleteResult
-} = require("../controllers/resultController");
+const resultController = require('../controllers/resultController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.get("/", getAllResults);
-router.post("/", createResult);
-router.put("/:id", updateResult);
-router.delete("/:id", deleteResult);
+// Ajouter un résultat (technicien)
+router.post('/', authMiddleware.verifyToken, resultController.addResult);
 
-export default router;
+// Récupérer les résultats du patient connecté
+router.get('/', authMiddleware.verifyToken, resultController.getResultsByPatient);
+
+module.exports = router;

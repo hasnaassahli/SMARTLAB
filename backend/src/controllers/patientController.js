@@ -1,12 +1,20 @@
-import Patient from"../models/Patient";
+import Patient from "../models/Patient.js";
 
-exports.getAllPatients = async (req, res) => {
-  const patients = await Patient.find();
-  res.json(patients);
+export const getAllPatients = async (req, res) => {
+  try {
+    const patients = await Patient.find();
+    res.json(patients);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
-exports.createPatient = async (req, res) => {
-  const patient = new Patient(req.body);
-  await patient.save();
-  res.status(201).json(patient);
+export const createPatient = async (req, res) => {
+  try {
+    const patient = new Patient(req.body);
+    await patient.save();
+    res.status(201).json(patient);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
 };

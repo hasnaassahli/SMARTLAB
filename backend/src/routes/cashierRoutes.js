@@ -1,17 +1,19 @@
+// backend/routes/cashierRoutes.js
 import express from 'express';
-const router = express.Router();
-const {
+import {
   getAllCashiers,
   createCashier,
   getCashierById,
   updateCashier,
-  deleteCashier
-} = require("../controllers/cashierController");
+  deleteCashier,
+} from '../controllers/cashierController.js';
 
-router.get("/", getAllCashiers);
-router.post("/", createCashier);
-router.get("/:id", getCashierById);
-router.put("/:id", updateCashier);
-router.delete("/:id", deleteCashier);
+const router = express.Router();
+
+router.get('/', getAllCashiers);
+router.post('/', createCashier);
+router.get('/:id', getCashierById);
+router.put('/:id', updateCashier);
+router.delete('/:id', deleteCashier);
 
 export default router;

@@ -1,37 +1,24 @@
-import Result from "../models/Result";
+// backend/controllers/resultController.js
+const Result = require('../models/Result');
 
-exports.getAllResults = async (req, res) => {
+// Ajouter un résultat d’analyse
+exports.addResult = async (req, res) => {
   try {
-    const results = await Result.find().populate("sample");
-    res.json(results);
+    const { patient, analysis, value, technician } = req.body;
+    const result = new Result({ patient, analysis, value, technician });
+    await result.save();
+    res.status(201).json(result);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-exports.createResult = async (req, res) => {
+// Récupérer résultats d’un patient (patient connecté)
+exports.getResultsByPatient = async (req, res) => {
   try {
-    const result = new Result(req.body);
-    await result.save();
-    res.status(201).json(result);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
-
-exports.updateResult = async (req, res) => {
-  try {
-    const updated = await Result.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updated);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-};
-
-exports.deleteResult = async (req, res) => {
-  try {
-    await Result.findByIdAndDelete(req.params.id);
-    res.json({ message: "Result deleted" });
+    const patientId = req.user.id;
+    const results = await Result.find({ patient: patientId });
+    res.json(results);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

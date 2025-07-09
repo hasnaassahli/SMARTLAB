@@ -1,10 +1,16 @@
-import express from 'express';
-import { createAppointment, getAllAppointments } from "../controllers/appointmentController.js";
-
+// backend/routes/appointmentRoutes.js
+const express = require('express');
 const router = express.Router();
+const appointmentController = require('../controllers/appointmentController');
+const authMiddleware = require('../middleware/authMiddleware');
 
-router.post("/", createAppointment);
-router.get("/", getAllAppointments);
+// Créer un rendez-vous (patient)
+router.post('/', authMiddleware.verifyToken, appointmentController.createAppointment);
 
-export default router;
+// Lister les rendez-vous en attente (caissier)
+router.get('/pending', authMiddleware.verifyToken, appointmentController.getPendingAppointments);
 
+// Valider un rendez-vous (caissier)
+router.put('/:id/validate', authMiddleware.verifyToken, appointmentController.validateAppointment);
+
+module.exports = router;

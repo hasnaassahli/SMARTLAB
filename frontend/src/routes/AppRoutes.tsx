@@ -2,7 +2,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
-import Login from "../pages/Login";
+import Login from "../pages/LoginPatient";
 import Patients from "../pages/Patients";
 import Technicians from "../pages/Technicians";
 import Cashier from "../pages/Cashiers";
@@ -10,8 +10,8 @@ import Results from "../pages/Results";
 import Dashboard from "../pages/Dashboard";
 import Samples from "../pages/Samples";
 import Payments from "../pages/Payments"; 
-import Appointment from "../pages/Appointment"; 
-import Register from "../pages/Register"; 
+import Appointment from "../pages/AppointmentForm"; 
+import Register from "../pages/RegisterPatient"; 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
