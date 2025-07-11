@@ -1,19 +1,7 @@
-// backend/routes/cashierRoutes.js
-import express from 'express';
-import {
-  getAllCashiers,
-  createCashier,
-  getCashierById,
-  updateCashier,
-  deleteCashier,
-} from '../controllers/cashierController.js';
-
+// routes/cashierRoutes.js
+const express = require('express');
 const router = express.Router();
-
-router.get('/', getAllCashiers);
-router.post('/', createCashier);
-router.get('/:id', getCashierById);
-router.put('/:id', updateCashier);
-router.delete('/:id', deleteCashier);
-
-export default router;
+const { body, validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const Cashier = require('../models/Cashier');
+const auth = require('../middleware/auth');

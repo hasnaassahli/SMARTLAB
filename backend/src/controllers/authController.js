@@ -1,58 +1,114 @@
-import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
+// src/controllers/authController.js
+const jwt = require('jsonwebtoken');
+const { validationResult } = require('express-validator');
+const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN
+  });
+};
 
-// Enregistrer un utilisateur (patient, technicien, caissier)
-export const register = async (req, res) => {
+const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: 'Tous les champs sont obligatoires' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const existingUser = await User.findOne({ email });
+    const { username, email, password, role, firstName, lastName, phone } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }]
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: 'Email déjà utilisé' });
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    const user = new User({ name, email, password, role });
+    const user = new User({
+      username,
+      email,
+      password,
+      role,
+      firstName,
+      lastName,
+      phone
+    });
+
     await user.save();
 
-    res.status(201).json({ message: 'Utilisateur enregistré avec succès' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    const token = generateToken(user._id);
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
-// Connexion utilisateur et génération de JWT
-export const login = async (req, res) => {
+const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email et mot de passe requis' });
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'Utilisateur non trouvé' });
+    const { username, password } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: username }, { username }]
+    });
+
+    if (!user || !await user.comparePassword(password)) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Mot de passe incorrect' });
+    if (!user.isActive) {
+      return res.status(401).json({ message: 'Account is inactive' });
     }
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    const token = generateToken(user._id);
 
-    res.json({ token, role: user.role, name: user.name });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json({
+      message: 'Login successful',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
+};
+
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getProfile
 };
